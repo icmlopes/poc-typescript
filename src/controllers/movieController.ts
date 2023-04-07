@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express";
 import { NewMovie } from "../protocols/movieProtocol.js";
 import { movieSchema } from "../schemas/movieSchema.js";
-import { getMovieById, getMoviesList, insertMovie, updateStatus } from "../repositories/movieRepository.js";
+import * as R from "../repositories/movieRepository.js";
 import { notFoundError } from "../errors/index.js";
 
 
@@ -21,7 +21,7 @@ export async function postMovie(req: Request, res: Response, next: NextFunction)
 
     try{
 
-        await insertMovie(movie)
+        await R.insertMovie(movie)
 
     } catch(err){
         next(err)
@@ -33,7 +33,7 @@ export async function getAllMovies(req: Request, res: Response, next: NextFuncti
 
     try{
 
-        const moviesList = await getMoviesList()
+        const moviesList = await R.getMoviesList()
         
         return res.status(200).send(moviesList.rows)
 
@@ -49,7 +49,7 @@ export async function listMovieById(req: Request, res: Response, next:NextFuncti
 
     try{
 
-        const getById = await getMovieById(id)
+        const getById = await R.getMovieById(id)
 
         return res.status(200).send(getById.rows)
 
@@ -66,18 +66,57 @@ export async function watchedStatus(req: Request, res: Response, next: NextFunct
 
     try{
 
-        const getById = await getMovieById(id)
+        const getById = await R.getMovieById(id)
 
         if(getById.rowCount === 0){
             throw notFoundError()
         }
 
-        await updateStatus(getComment, id) 
+        await R.updateStatus(getComment, id) 
 
         return res.sendStatus(200)
 
     } catch(err){
         console.log(err)
+        next(err)
+    }
+}
+
+export async function deleteMovie (req: Request, res: Response, next:NextFunction) {
+
+    const id = Number (req.params.id)
+
+    try{
+
+        const getById = await R.getMovieById(id)
+
+        if(getById.rowCount === 0){
+            throw notFoundError()
+        }
+
+        await R.deleteMovieById(id)
+
+        return res.status(500).send("Filme deletado com sucesso!!")
+
+    } catch(err){
+        next(err)
+    }
+
+}
+
+export async function getPlatformRanking(req: Request, res: Response, next: NextFunction){
+
+    try{
+
+        const ranking = await R.platformsCount()
+
+        if(ranking.rowCount === 0){
+            throw notFoundError()
+        }
+
+        return res.status(200).send(ranking.rows)
+
+    } catch(err){
         next(err)
     }
 }

@@ -15,7 +15,14 @@ export async function getMovieById(id: number): Promise<QueryResult<string[]>>{
     return await connection.query(`SELECT * FROM movies WHERE id = $1`, [id])
 }
 
-export async function updateStatus(comment: string, id: number){
+export async function updateStatus(comment: string, id: number): Promise<QueryResult>{
     return await connection.query(`UPDATE movies SET watched = true, comment = $1 WHERE id = $2`, [comment, id])
 }
 
+export async function deleteMovieById(id: number){
+    return await connection.query(`DELETE FROM movies WHERE id = $1`, [id])
+}
+
+export async function platformsCount(): Promise<QueryResult<string[]>>{
+    return await connection.query(`SELECT platform, COUNT(*) FROM movies GROUP BY platform ORDER BY count DESC`)
+}
