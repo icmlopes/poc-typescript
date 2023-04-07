@@ -10,3 +10,12 @@ export async function insertMovie(movie: NewMovie): Promise<QueryResult> {
 export async function getMoviesList(): Promise<QueryResult<string[]>>{
     return await connection.query(`SELECT * FROM movies`)
 }
+
+export async function getMovieById(id: number): Promise<QueryResult<string[]>>{
+    return await connection.query(`SELECT * FROM movies WHERE id = $1`, [id])
+}
+
+export async function updateStatus(comment: string, id: number){
+    return await connection.query(`UPDATE movies SET watched = true, comment = $1 WHERE id = $2`, [comment, id])
+}
+

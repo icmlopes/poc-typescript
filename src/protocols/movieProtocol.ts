@@ -10,3 +10,4 @@ export type MovieEntity = {
 }
 
 export type NewMovie = Omit<MovieEntity, "id">
+
