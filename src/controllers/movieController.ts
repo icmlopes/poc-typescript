@@ -1,7 +1,8 @@
+import { MovieEntity } from './../protocols/movieProtocol.js';
 import { NextFunction, Request, Response } from "express";
 import { NewMovie } from "../protocols/movieProtocol.js";
 import { movieSchema } from "../schemas/movieSchema.js";
-import { insertMovie } from "../repositories/movieRepository.js";
+import { getMoviesList, insertMovie } from "../repositories/movieRepository.js";
 
 
 export async function postMovie(req: Request, res: Response, next: NextFunction) {
@@ -17,14 +18,27 @@ export async function postMovie(req: Request, res: Response, next: NextFunction)
             message: error.message
         })
     }
-    
+
     try{
 
         await insertMovie(movie)
 
     } catch(err){
-        console.log(err)
         next(err)
     }
     res.status(200).send("Filme criado com sucesso! =D")
+}
+
+export async function getAllMovies(req: Request, res: Response, next: NextFunction){
+
+    try{
+
+        const moviesList = await getMoviesList()
+        
+        return res.status(200).send(moviesList.rows)
+
+    } catch(err){
+        next(err)
+    }
+
 }
