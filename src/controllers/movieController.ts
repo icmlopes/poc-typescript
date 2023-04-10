@@ -3,6 +3,7 @@ import { NewMovie } from "../protocols/movieProtocol.js";
 import { movieSchema } from "../schemas/movieSchema.js";
 import * as R from "../repositories/movieRepository.js";
 import { notFoundError } from "../errors/index.js";
+import * as S from "../services/index.js";
 
 
 export async function postMovie(req: Request, res: Response, next: NextFunction) {
@@ -21,7 +22,7 @@ export async function postMovie(req: Request, res: Response, next: NextFunction)
 
     try{
 
-        await R.insertMovie(movie)
+        await S.createNewMovie(movie)
 
     } catch(err){
         next(err)
@@ -33,9 +34,9 @@ export async function getAllMovies(req: Request, res: Response, next: NextFuncti
 
     try{
 
-        const moviesList = await R.getMoviesList()
+        const moviesList = await S.showAllMovies()
         
-        return res.status(200).send(moviesList.rows)
+        return res.status(200).send(moviesList)
 
     } catch(err){
         next(err)
@@ -49,9 +50,9 @@ export async function listMovieById(req: Request, res: Response, next:NextFuncti
 
     try{
 
-        const getById = await R.getMovieById(id)
+        const getById = await S.showById(id)
 
-        return res.status(200).send(getById.rows)
+        return res.status(200).send(getById)
 
     } catch(err){
         console.log(err)
@@ -62,18 +63,12 @@ export async function listMovieById(req: Request, res: Response, next:NextFuncti
 export async function watchedStatus(req: Request, res: Response, next: NextFunction){
 
     const id = Number(req.params.id)
-    const getComment = req.body 
+    const {comment} = req.body 
 
     try{
 
-        const getById = await R.getMovieById(id)
-
-        if(getById.rowCount === 0){
-            throw notFoundError()
-        }
-
-        await R.updateStatus(getComment, id) 
-
+        await S.changeStatus(comment, id)
+  
         return res.sendStatus(200)
 
     } catch(err){
@@ -88,13 +83,7 @@ export async function deleteMovie (req: Request, res: Response, next:NextFunctio
 
     try{
 
-        const getById = await R.getMovieById(id)
-
-        if(getById.rowCount === 0){
-            throw notFoundError()
-        }
-
-        await R.deleteMovieById(id)
+        await S.removeMovie(id)
 
         return res.status(500).send("Filme deletado com sucesso!!")
 
@@ -108,13 +97,9 @@ export async function getPlatformRanking(req: Request, res: Response, next: Next
 
     try{
 
-        const ranking = await R.platformsCount()
+        const ranking = await S.countPlatform()
 
-        if(ranking.rowCount === 0){
-            throw notFoundError()
-        }
-
-        return res.status(200).send(ranking.rows)
+        return res.status(200).send(ranking)
 
     } catch(err){
         next(err)
